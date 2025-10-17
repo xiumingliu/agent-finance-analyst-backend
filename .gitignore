@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+
+# Env
+.env
+!.env.example
+
+# Test/coverage
+.coverage
+htmlcov/
+
+# Build
+dist/
+build/
+
+# uv
+.venv/
+uv.lock
+
+# Editor
+.vscode/
+.DS_Store
+
+# Data
+data/
