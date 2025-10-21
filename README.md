@@ -6,8 +6,8 @@ This is an AI agent for finance related tasks such as cash flow analysis based o
 
 - Push to ACR: 
 
-´´´bash
+```bash
 bash scripts/build_push.sh v0.x.x
-´´´
+```
 
 - Create a new app revision with the latest image
