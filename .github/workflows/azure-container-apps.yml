@@ -30,6 +30,10 @@ jobs:
 
       - name: Azure Login (OIDC)
         uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       
       - name: Show current Azure account (before set)
         run: az account show -o table
@@ -46,11 +50,6 @@ jobs:
           echo "ACR=${{ env.ACR_NAME }}"
           echo "IMAGE=${{ env.IMAGE_NAME }}"
           echo "TAG=${IMAGE_TAG}"
-
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Show Azure CLI version
         run: az version
