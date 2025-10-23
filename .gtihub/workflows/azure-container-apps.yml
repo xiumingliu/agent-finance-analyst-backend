@@ -3,27 +3,31 @@ name: Backend – ACR Build & Container App Deploy (OIDC)
 on:
   push:
     branches: [main]
-    paths:
-      - "Dockerfile"
-      - "app/**"
-      - "pyproject.toml"
-      - "uv.lock"
-      - ".dockerignore"
-      - ".github/workflows/backend-deploy.yml"
   workflow_dispatch:
 
 jobs:
   deploy:
+    name: Deploy to Azure Container Apps
     environment: dev-perigus
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    # You can set these in the GitHub Environment (dev-perigus) as "Variables"
+    # and reference with ${{ vars.VAR_NAME }}, or hardcode here.
+    env:
+      ACR_NAME: ${{ vars.ACR_NAME }}                # e.g. perigusacr
+      IMAGE_NAME: ${{ vars.IMAGE_NAME }}            # e.g. finance-backend
+      AZURE_RESOURCE_GROUP: ${{ vars.AZURE_RESOURCE_GROUP }}   # e.g. rg-perigus
+      CONTAINERAPP_NAME: ${{ vars.CONTAINERAPP_NAME }}         # e.g. finance-agent
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Derive image tag
+      - name: Derive image tag (short SHA)
         run: echo "IMAGE_TAG=${GITHUB_SHA::7}" >> $GITHUB_ENV
 
-      # Passwordless login to Azure via OIDC
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
@@ -31,23 +35,24 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Azure CLI version
+      - name: Show Azure CLI version
         run: az version
 
-      - name: ACR Build (server-side)
+      - name: ACR Build (server-side, linux/amd64)
         run: |
           az acr build \
-            --registry ${{ vars.ACR_NAME }} \
-            --image ${{ vars.IMAGE_NAME }}:${{ vars.IMAGE_TAG }} \
+            --registry "$ACR_NAME" \
+            --image "$IMAGE_NAME:${IMAGE_TAG}" \
             --platform linux/amd64 \
             --file Dockerfile \
             .
 
       - name: Update Container App image
         run: |
-          ACR_LOGIN_SERVER=$(az acr show -n ${{ vars.ACR_NAME }} --query "loginServer" -o tsv)
-          FULL_TAG="${ACR_LOGIN_SERVER}/${{ vars.IMAGE_NAME }}:${{ vars.IMAGE_TAG }}"
+          ACR_LOGIN_SERVER=$(az acr show -n "$ACR_NAME" --query "loginServer" -o tsv)
+          FULL_TAG="${ACR_LOGIN_SERVER}/${IMAGE_NAME}:${IMAGE_TAG}"
+          echo "Deploying image: $FULL_TAG"
           az containerapp update \
-            -n ${{ vars.CONTAINERAPP_NAME }} \
-            -g ${{ vars.AZURE_RESOURCE_GROUP }} \
+            --name "$CONTAINERAPP_NAME" \
+            --resource-group "$AZURE_RESOURCE_GROUP" \
             --image "$FULL_TAG"
