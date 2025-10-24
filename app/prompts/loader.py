@@ -10,7 +10,7 @@ def load_text(package: str, name: str) -> str:
         return f.read()
 
 def compose_finance_agent_prefix() -> str:
-    core = load_text("app.prompts", "finance_agent_prefix.md")
-    fpna = load_text("app.prompts", "fpna_cashflow_knowledge.md")
+    core = load_text("app.prompts", "finance_agent_system_prompt.md")
+    fpna = load_text("app.prompts", "fpna_cashflow_analysis.md")
     # Keep the core first; append business knowledge.
     return f"{core}\n\n{fpna}\n"
