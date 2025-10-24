@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import io, base64
 
 from ..core.config import settings
+from app.prompts.loader import compose_finance_agent_prefix
 
 AGENT_PREFIX = """
 You are a finance analyst working with a pandas DataFrame `df` of SIE-like transactions.
@@ -18,13 +19,15 @@ Rules:
 """
 
 def build_agent(df, memory: ConversationBufferMemory, model_name: str):
+    prefix = compose_finance_agent_prefix()
+
     base = create_pandas_dataframe_agent(
         ChatOpenAI(model=model_name, temperature=0, api_key=settings.openai_api_key),
         df,
         verbose=True,
         agent_type="openai-tools",
         allow_dangerous_code=True,
-        prefix=AGENT_PREFIX,
+        prefix=prefix,
         agent_kwargs={"extra_prompt_messages": [MessagesPlaceholder(variable_name="chat_history")]},
     )
     executor = AgentExecutor.from_agent_and_tools(
