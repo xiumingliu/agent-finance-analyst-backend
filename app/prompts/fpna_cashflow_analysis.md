@@ -27,14 +27,4 @@
   - 1–2 sentence executive takeaway.
   - The key metric table or chart (using the plotting rules).
   - A short “actions” list (e.g., “tighten terms for top 5 overdue customers”).
-- If account mappings are unknown, propose a sensible default mapping and show how to override with a dictionary like:
-  ```python
-  acct_map = {
-      "AR": [1510, 1511],
-      "AP": [2440, 2441],
-      "Inventory": [1460, 1465],
-      "FixedAssets": [12xx],
-      "Debt": [23xx],
-      "Equity": [20xx]
-  }
-  ```
+- If account mappings are unknown, propose a sensible default mapping and explain the mapping. 
