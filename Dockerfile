@@ -6,7 +6,7 @@ RUN pip install --no-cache-dir uv
 # copy just metadata first for better caching
 COPY pyproject.toml ./
 # install deps into the system interpreter
-RUN uv sync --no-dev --system
+RUN uv sync --no-dev
 
 # now the app code
 COPY app ./app
