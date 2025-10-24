@@ -1,23 +1,16 @@
-# Dockerfile (at repo root)
 FROM python:3.12-slim
 
 WORKDIR /app
-
-# Install uv + deps
 RUN pip install --no-cache-dir uv
 
-# Copy project files
-# COPY pyproject.toml uv.lock ./
-# RUN uv sync --frozen --no-cache
-
-# only copy project metadata first for better layer caching
+# copy just metadata first for better caching
 COPY pyproject.toml ./
-# (do NOT COPY uv.lock here)
+# install deps into the system interpreter
+RUN uv sync --no-dev --system
 
-# resolve and install dependencies (no dev)
-RUN uv pip install --system --no-cache -r <(uv pip compile -q pyproject.toml)
-
+# now the app code
 COPY app ./app
 
+ENV HOST=0.0.0.0 PORT=8000
 EXPOSE 8000
-CMD ["uv", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "uvicorn", "app.main:app", "--host","0.0.0.0","--port","8000"]
